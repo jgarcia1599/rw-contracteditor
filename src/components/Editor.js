@@ -3,7 +3,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import './Editor.css'
-
+import QuillEditor from './QuillEditor'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -46,7 +46,7 @@ export default function Editor() {
         </div>
         </Grid>
         <Grid item tem xs={12} sm={8} md={9} >
-            jsjjsjs
+            <QuillEditor></QuillEditor>
         </Grid>
 </Grid>
   );
