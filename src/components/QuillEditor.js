@@ -54,15 +54,45 @@ export default class Editor extends Component {
 
   constructor(props){
     super(props)
+    this.currentEditor = null;
+    this.currentFormats = null;
+    this.createEditor = this.createEditor.bind(this)
 
 
   }
   componentDidMount() {
-    createEditor("#editor1");
-    createEditor("#editor2");
-    createEditor("#editor3");
-    createEditor("#editor4");
+    this.createEditor("#editor1");
+    this.createEditor("#editor2");
+    this.createEditor("#editor3");
+    this.createEditor("#editor4");
   }
+  createEditor(selector, ...args){
+    var quill = new Quill(selector, {
+      modules: {
+        toolbar: '#toolbar',
+        placeholder: {
+          delimiters: ['{', '}'],  // default
+          placeholders: [
+            {id: 'contractname', label: 'contractname'},
+            {id: 'taxresidence', label: 'taxresidence', required: true}
+          ]
+        }
+      },
+      theme: 'snow',
+    });
+  
+    quill.on("editor-change", () => {		
+      this.currentEditor = quill;
+      
+      this.updateButtons();
+    });
+  }
+  updateButtons(){
+    if (this.currentEditor.getSelection()) {
+      this.currentFormats = this.currentEditor.getFormat();
+    }
+  }
+
 
   handleChange = (value, delta, source, editor) => {
     console.log('value', value)
