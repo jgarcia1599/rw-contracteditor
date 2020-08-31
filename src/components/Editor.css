@@ -29,4 +29,44 @@ ql-picker.ql-placeholder {
 #blue{
     color:'blue';
 }
+.color{
+  color:"blue";
+}
+
+button.active {
+	color: #06c;
+}
+.active {
+	background: green;
+}
+
+.ql-container {
+	margin: 20px;
+}
+
+.ql-editor {
+	border: solid 1px #cccccc;
+}
+.ql-editor:focus {
+	border-color: #556EE6
+}
   
+.ql-picker.ql-placeholder {
+  width: 118px;
+  width: 150px;
+  background-color:#556EE6 ;
+  color: 'white';
+}
+#blueBackground{
+  background-color:"#556EE6" ;
+
+}
+
+.ql-picker.ql-placeholder > span.ql-picker-label::before {
+  content: 'Placeholders';
+  color:'white';
+}
+
+.ql-picker.ql-placeholder > span.ql-picker-options > span.ql-picker-item::before {
+  content: attr(data-label);
+}
