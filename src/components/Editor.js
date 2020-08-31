@@ -5,6 +5,18 @@ import { makeStyles } from '@material-ui/core/styles';
 import './Editor.css'
 import QuillEditor from './QuillEditor'
 
+const modules = {
+    toolbar: '#toolbar',
+    placeholder: {
+      delimiters: ['{{', '}}'],
+      placeholders: [
+        { id: 'first_name', label: 'first_name', displayName: 'First Name' },
+        { id: 'last_name', label: 'last_name', displayName: 'Last Name' },
+      ],
+    },
+  }
+
+
 const useStyles = makeStyles((theme) => ({
   root: {
     height: '100vh',
@@ -43,6 +55,13 @@ export default function Editor() {
         <div className={classes.leftPanelContent}>
             <h1>Contract Parameters</h1>
             <p>To add parameters please either click on them in the sidebar, highlight the text and right click or type "@" to access them.</p>
+            <span class="ql-formats">
+            <select class="ql-placeholder">
+                {modules.placeholder.placeholders.map(p => (
+                <option value={p.id}>{p.displayName}</option>
+                ))}
+            </select>
+            </span>
         </div>
         </Grid>
         <Grid item tem xs={12} sm={8} md={9} >
