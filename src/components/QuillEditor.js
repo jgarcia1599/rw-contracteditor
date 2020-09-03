@@ -6,65 +6,68 @@ import sanitizeHtml from 'sanitize-html'
 import 'react-quill/dist/quill.snow.css';
 import 'react-quill/dist/quill.bubble.css';
 import './Editor.css'
+import contractdata from './contract.json'
 
 Quill.register('modules/placeholder', getPlaceholderModule(Quill, {
   className: 'ql-placeholder-content'  // default
 }))
-
-
-var currentEditor; // selected / focused editor
-var currentFormats; // save the current formattings
-
-
-// Place holder Module
-// https://github.com/jspaine/quill-placeholder-module
-
-function createEditor(selector, ...args) {
-	
-	var quill = new Quill(selector, {
-		modules: {
-      toolbar: '#toolbar',
-      placeholder: {
-        delimiters: ['{', '}'],  // default
-        placeholders: [
-          {id: 'contractname', label: 'contractname'},
-          {id: 'taxresidence', label: 'taxresidence', required: true}
-        ]
-      }
-		},
-		theme: 'snow',
-	});
-
-	quill.on("editor-change", () => {		
-		currentEditor = quill;
-		
-		updateButtons();
-	});
-}
-
-// get current formattings to style the toolbar buttons
-function updateButtons() {
-	if (currentEditor.getSelection()) {
-		currentFormats = currentEditor.getFormat();
-	}
-}
 
 export default class Editor extends Component {
   // state = { text: '' }
 
   constructor(props){
     super(props)
-    this.currentEditor = null;
-    this.currentFormats = null;
-    this.createEditor = this.createEditor.bind(this)
+    this.state = {
+      currentEditor:null,
+      currentFormats:null,
+      clauseEditors:[],
+      contractData:[]
+    }
+
+    // this.currentEditor = null;
+    // this.currentFormats = null;
+    // this.clauseEditors = [];
+    // this.contractaData = [];
+
+    this.createEditor = this.createEditor.bind(this);
+    this.handleChange =  this.handleChange.bind(this);
+    this.editorchangelistener = this.editorchangelistener.bind(this)
+    this.MoveClausesDown = this.MoveClausesDown.bind(this)
+    this.MoveClausesUp = this.MoveClausesUp.bind(this)
+
 
 
   }
   componentDidMount() {
-    this.createEditor("#editor1");
-    this.createEditor("#editor2");
-    this.createEditor("#editor3");
-    this.createEditor("#editor4");
+    //this is where the backend call would go
+
+    const data = contractdata.map( (clause) =>{
+      console.log(clause);
+      this.setState({
+        contractdata: this.state.contractData.push(clause)
+      })
+    })
+    console.log(this.state.contractData);
+
+
+    // using set timeout here to allow quill to look for the corresponding
+    // renderiungs in the html
+    // thanks to https://stackoverflow.com/questions/49274106/quill-error-quill-invalid-quill-container
+    setTimeout( () =>
+    {
+      var quils = []
+      for (var i=0; i<this.state.contractData.length;i++){
+          var clauseeditor = this.createEditor(`#editor${i+1}`);
+          console.log(clauseeditor);
+          quils.push(clauseeditor);
+
+      }
+      console.log("Quil editors",quils)
+      this.setState({
+        clauseEditors:quils
+      })
+      console.log("Ok now the editors are on the state", this.state.clauseEditors);
+    },10)
   }
   createEditor(selector, ...args){
     var quill = new Quill(selector, {
@@ -80,44 +83,65 @@ export default class Editor extends Component {
       },
       theme: 'snow',
     });
-  
-    quill.on("editor-change", () => {		
-      this.currentEditor = quill;
+    return quill;
+  }
+  editorchangelistener(editor){
+    editor.on("editor-change", () => {		
+      this.currentEditor = editor;
+      console.log(this.currentEditor);
+      console.log("Inner Html Content of the editor", this.currentEditor.container.innerHTML)
       
       this.updateButtons();
     });
+
   }
   updateButtons(){
     if (this.currentEditor.getSelection()) {
       this.currentFormats = this.currentEditor.getFormat();
     }
   }
+  MoveClausesUp(){
+    console.log("Move Clauses Up")
+  }
+  MoveClausesDown(){
+    console.log("Move Clauses Down")
+  }
 
 
-  handleChange = (value, delta, source, editor) => {
-    console.log('value', value)
-    console.log('editor.getHTML', editor.getHTML())
-    console.log('editor.getText', editor.getText())
+  handleChange = (value) => {
+    console.log('value', value);
     // this.setState({ text: value })
   }
 
   setRef = node => (this.editorRef = node)
 
-//   componentDidMount() {
-//     this.editorRef.getEditor().root.addEventListener('paste', event => {
-//       console.log('asdf', this.editorRef.getEditor())
-//       event.preventDefault()
-//       const text = sanitizeClipboardEvent({ event })
-//       const { index: cursorIndex } = this.editorRef.getEditorSelection()
-//       console.log('cursorIndex', cursorIndex)
-//       this.editorRef
-//         .getEditor()
-//         .clipboard.dangerouslyPasteHTML(cursorIndex, text)
-//     })
-//   }
-
   render() {
+    console.log("Ok now the editors are on the state", this.state.clauseEditors);
+    for (var i =0;i<this.state.clauseEditors.length;i++){
+      var currentEditor = this.state.clauseEditors[i];
+      this.editorchangelistener(currentEditor);
+
+    }
+    const editors = this.state.contractData.map((value,key)=>{
+      console.log("Key",key);
+      console.log("Value",value);
+      const editorid = `editor${key+1}`;
+      console.log("Editor ",editorid);
+      return(
+      <div className="col-md-6">
+        <h2 className="h4 text-center">Clause {key+1}</h2>
+        <button>Up</button>
+        <button>Down</button>
+        <div id={editorid} onChange={this.handleChange()}>
+          <p>{value.content}</p>
+        </div>
+      </div>
+      )
+    })
+    console.log("Dynamic ediotrs", editors)
+      
     return (
+      
 <div>
 <nav id="toolbar" className="nav-toolbar">
   <span style={{backgroundColor:'#556EE6',color:"white"}}className="ql-formats color" id="blueBackground">
@@ -199,173 +223,27 @@ export default class Editor extends Component {
 <br/><br/>
 
 <section className="row">
-	<div className="col-md-6">
-		<h2 className="h4 text-center">Clause #1</h2>
-		<div id="editor1">
-			<p>Hello World!</p>
-			<p>Some initial <strong>bold</strong> text</p>
-			<p>Some <em>lorem ipsum</em> text</p>
-		</div>
-	</div>
-	<div className="col-md-6">
-		<h2 className="h4 text-center">Clause #2</h2>
-		<div id="editor2">
-			<p>Hello World! 2</p>
-			<p>Some initial <strong>bold</strong> text</p>
-			<p>Some lorem ipsum text</p>
-		</div>
-	</div>
+{this.state.contractData.map((value,key)=>{
+      console.log("Key",key);
+      console.log("Value",value);
+      const editorid = `editor${key+1}`;
+      console.log("Editor ",editorid);
+      return(
+      <div className="col-md-6">
+        <h2 className="h4 text-center">Clause {key+1}</h2>
+        <button>Up</button>
+        <button>Down</button>
+        <div id={editorid} onChange={this.handleChange()}>
+          <p>{value.content}</p>
+        </div>
+      </div>
+      )
+    })}
 </section>
 
-<br/> <br/>
-
-<section className="row">
-	<div className="col-md-6">
-		<h2 className="h4">Clause #3</h2>
-		<div id="editor3">
-			<p>Hello World! 3</p>
-			<p>Some initial <strong>bold</strong> text</p>
-			<p>Some <em>lorem ipsum</em> text</p>
-		</div>
-	</div>
-	<div className="col-md-6">
-		<h2 className="h4 text-center">Clause #4</h2>
-		<div id="editor4">
-			<p>Hello World! 4</p>
-			<p>Some initial <strong>bold</strong> text</p>
-			<p>Some lorem ipsum text</p>
-		</div>
-	</div>
-</section>
 </div>
     )
   }
-}
-
-
-function onBoldClick() {
-	if (!currentFormats || !currentEditor) {
-		return;
-	}
-
-	if (currentFormats.bold) {
-		currentEditor.format("bold", false);
-	} else {
-		currentEditor.format("bold", true);
-	}
-}
-function onItalicClick() {
-	if (!currentFormats || !currentEditor) {
-		return;
-	}
-
-	if (currentFormats.italic) {
-		currentEditor.format("italic", false);
-	} else {
-		currentEditor.format("italic", true);
-	}
-}
-function onUnderlineClick() {
-	if (!currentFormats || !currentEditor) {
-		return;
-	}
-
-	if (currentFormats.underline) {
-		currentEditor.format("underline", false);
-	} else {
-		currentEditor.format("underline", true);
-	}
-}
-function onStrikeClick() {
-	if (!currentFormats || !currentEditor) {
-		return;
-	}
-
-	if (currentFormats.strike) {
-		currentEditor.format("strike", false);
-	} else {
-		currentEditor.format("strike", true);
-	}
-}
-
-function onAlignLeftClick() {
-	if (!currentFormats || !currentEditor) {
-		return;
-	}
-
-	if (!currentFormats.align) {
-		currentEditor.format('align', true);
-	} else {
-		currentEditor.format('align', false);
-	}
-}
-function onAlignRightClick() {
-	if (!currentFormats || !currentEditor) {
-		return;
-	}
-
-	if (currentFormats.align == 'right') {
-		currentEditor.format('align', 'right', true);
-	} else {
-		currentEditor.format('align', 'right', false);
-	}
-}
-function onAlignCenterClick() {
-	if (!currentFormats || !currentEditor) {
-		return;
-	}
-
-	if (currentFormats.align == 'center') {
-		currentEditor.format('align', 'center', true);
-	} else {
-		currentEditor.format('align', 'center', false);
-	}
-}
-function onAlignJustifyClick() {
-	if (!currentFormats || !currentEditor) {
-		return;
-	}
-
-	if (currentFormats.align == 'justify') {
-		currentEditor.format('align', 'justify', true);
-	} else {
-		currentEditor.format('align', 'justify', false);
-	}
-}
-
-function onListULClick() {
-	if (!currentFormats || !currentEditor) {
-		return;
-	}
-
-	if (currentFormats.list == 'bullet') {
-		currentEditor.format('list', 'bullet', true);
-	} else {
-		currentEditor.format('list', 'bullet', false);
-	}
-}
-function onListOLClick() {
-	if (!currentFormats || !currentEditor) {
-		return;
-	}
-
-	if (currentFormats.list == 'ordered') {
-		currentEditor.format('list', 'ordered', true);
-	} else {
-		currentEditor.format('list', 'ordered', false);
-	}
-}
-
-function onBlockquoteClick() {
-	if (!currentFormats || !currentEditor) {
-		return;
-	}
-
-	if (currentFormats.blockquote) {
-		currentEditor.format("blockquote", false);
-	} else {
-		currentEditor.format("blockquote", true);
-	}
 }
 
 
@@ -377,3 +255,56 @@ function onBlockquoteClick() {
 
 // Thank you destiniy!!!!
 // https://codesandbox.io/s/vywr23wk50?file=/src/Editor.css:1-254
+
+
+{/* <section className="row">
+	<div className="col-md-6">
+		<h2 className="h4 text-center">Clause #1</h2>
+    <button>Up</button>
+    <button>Down</button>
+		<div id="editor1" onChange={this.handleChange()}>
+			<p>Hello World!</p>
+			<p>Some initial <strong>bold</strong> text</p>
+			<p>Some <em>lorem ipsum</em> text</p>
+		</div>
+	</div>
+	<div className="col-md-6">
+		<h2 className="h4 text-center">Clause #2</h2>
+    <button>Up</button>
+    <button>Down</button>
+		<div id="editor2">
+			<p>Hello World! 2</p>
+			<p>Some initial <strong>bold</strong> text</p>
+			<p>Some lorem ipsum text</p>
+		</div>
+	</div>
+	<div className="col-md-6">
+		<h2 className="h4">Clause #3</h2>
+    <button>Up</button>
+    <button>Down</button>
+		<div id="editor3">
+			<p>Hello World! 3</p>
+			<p>Some initial <strong>bold</strong> text</p>
+			<p>Some <em>lorem ipsum</em> text</p>
+		</div>
+	</div>
+	<div className="col-md-6">
+		<h2 className="h4 text-center">Clause #4</h2>
+    <button>Up</button>
+    <button>Down</button>
+		<div id="editor4">
+			<p>Hello World! 4</p>
+		</div>
+	</div>
+	<div className="col-md-6">
+  <h2 className="h4">Clause #5</h2>
+    <button>Up</button>
+    <button>Down</button>
+		<div id="editor5">
+			<p>Hello World! 5</p>
+			<p>Some initial <strong>bold</strong> text</p>
+			<p>Some <em>lorem ipsum</em> text</p>
+		</div>
+
+  </div>
+</section> */}
