@@ -41,6 +41,7 @@ export default class Editor extends Component {
     this.editorchangelistener = this.editorchangelistener.bind(this)
     this.MoveClausesDown = this.MoveClausesDown.bind(this)
     this.MoveClausesUp = this.MoveClausesUp.bind(this)
+    this.Movecurrenteditordata = this.Movecurrenteditordata.bind(this)
     this.savecurrenteditordata = this.savecurrenteditordata.bind(this)
 
 
@@ -124,7 +125,26 @@ export default class Editor extends Component {
     this.setState({
       contractData:[...reordered_data],
     })
-    this.savecurrenteditordata(reordered_data);
+    this.Movecurrenteditordata(reordered_data);
+  }
+  Movecurrenteditordata(reordered_data){
+    console.log("jsjsjsj")
+    console.log(this.state.contractData);
+    var editors = this.state.clauseEditors;
+    for (var i = 0; i< editors.length;i++){
+      var currentEditor = editors[i];
+      var containerid = parseInt(currentEditor.container.id[currentEditor.container.id.length - 1]);
+      console.log(containerid);
+      var contractdata = reordered_data;
+      console.log(contractdata);
+      var contractdataitem = contractdata[containerid - 1];
+      console.log(contractdataitem);
+      currentEditor.setContents([{ insert: contractdataitem.content }]);
+    }
+    // for (var i = 0;i< this.state.contractData.length;i++){
+    //   console.log(i);
+    //   console.log(this.state.contractData[i])
+    // }
   }
   savecurrenteditordata(reordered_data){
     console.log("jsjsjsj")
