@@ -53,15 +53,9 @@ export default function Editor() {
 
       >
         <div className={classes.leftPanelContent}>
-            <h1>Contract Parameters</h1>
-            <p>To add parameters please either click on them in the sidebar, highlight the text and right click or type "@" to access them.</p>
-            <span class="ql-formats">
-            <select class="ql-placeholder">
-                {modules.placeholder.placeholders.map(p => (
-                <option value={p.id}>{p.displayName}</option>
-                ))}
-            </select>
-            </span>
+            <h1>RemoteWise Contract Editor</h1>
+            <p>1. Use the PlaceHolder Option in the toolbar to add place holder values to your contract</p>
+            <p>2. Click on the up and down buttons to reorganize clauses dynamically!</p>
         </div>
         </Grid>
         <Grid item tem xs={12} sm={8} md={9} >

@@ -1,3 +1,11 @@
+Examples:
+- https://codepen.io/abolo/pen/xmzZbO
+- https://codesandbox.io/s/vywr23wk50?file=/src/Editor.css:1-254
+- Multiple Edtors
+  - https://codepen.io/umairrazzaq/pen/wmKVRK
+- https://github.com/jspaine/quill-placeholder-module
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
