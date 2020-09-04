@@ -23,6 +23,13 @@ export default class Editor extends Component {
       clauseEditors:[],
       contractData:[]
     }
+    const data = contractdata.map( (clause) =>{
+      console.log(clause);
+      this.setState({
+        contractdata: this.state.contractData.push(clause)
+      })
+    })
+    console.log(this.state.contractData);
 
     // this.currentEditor = null;
     // this.currentFormats = null;
@@ -34,6 +41,7 @@ export default class Editor extends Component {
     this.editorchangelistener = this.editorchangelistener.bind(this)
     this.MoveClausesDown = this.MoveClausesDown.bind(this)
     this.MoveClausesUp = this.MoveClausesUp.bind(this)
+    this.savecurrenteditordata = this.savecurrenteditordata.bind(this)
 
 
 
@@ -41,17 +49,16 @@ export default class Editor extends Component {
   componentDidMount() {
     //this is where the backend call would go
 
-    const data = contractdata.map( (clause) =>{
-      console.log(clause);
-      this.setState({
-        contractdata: this.state.contractData.push(clause)
-      })
-    })
-    console.log(this.state.contractData);
-
+    // const data = contractdata.map( (clause) =>{
+    //   console.log(clause);
+    //   this.setState({
+    //     contractdata: this.state.contractData.push(clause)
+    //   })
+    // })
+    // console.log(this.state.contractData);
 
     // using set timeout here to allow quill to look for the corresponding
-    // renderiungs in the html
+    // renderings in the html
     // thanks to https://stackoverflow.com/questions/49274106/quill-error-quill-invalid-quill-container
     setTimeout( () =>
     {
@@ -88,9 +95,6 @@ export default class Editor extends Component {
   editorchangelistener(editor){
     editor.on("editor-change", () => {		
       this.currentEditor = editor;
-      console.log(this.currentEditor);
-      console.log("Inner Html Content of the editor", this.currentEditor.container.innerHTML)
-      
       this.updateButtons();
     });
 
@@ -100,46 +104,64 @@ export default class Editor extends Component {
       this.currentFormats = this.currentEditor.getFormat();
     }
   }
-  MoveClausesUp(){
+  MoveClausesUp(event){
     console.log("Move Clauses Up")
+    const clause_to_move_up_from = parseInt(event.target.id[0]);
+    console.log("clause_to_move_up_from",clause_to_move_up_from);
+    var reordered_data = shift(this.state.contractData,-1,1);
+    this.setState({
+      contractData:reordered_data,
+    })
+    this.savecurrenteditordata(reordered_data);
   }
-  MoveClausesDown(){
+  MoveClausesDown(event){
     console.log("Move Clauses Down")
+    const clause_to_move_down_from = parseInt(event.target.id[0]);
+    console.log("clause_to_move_down_from",clause_to_move_down_from);
+    var reordered_data = shift([...this.state.contractData],1,1);
+    console.log("Reordered")
+    console.log(reordered_data);
+    this.setState({
+      contractData:[...reordered_data],
+    })
+    this.savecurrenteditordata(reordered_data);
+  }
+  savecurrenteditordata(reordered_data){
+    console.log("jsjsjsj")
+    console.log(this.state.contractData);
+    var editors = this.state.clauseEditors;
+    for (var i = 0; i< editors.length;i++){
+      var currentEditor = editors[i];
+      var containerid = parseInt(currentEditor.container.id[currentEditor.container.id.length - 1]);
+      console.log(containerid);
+      var contractdata = reordered_data;
+      console.log(contractdata);
+      var contractdataitem = contractdata[containerid - 1];
+      console.log(contractdataitem);
+      currentEditor.setContents([{ insert: contractdataitem.content }]);
+    }
+    // for (var i = 0;i< this.state.contractData.length;i++){
+    //   console.log(i);
+    //   console.log(this.state.contractData[i])
+    // }
   }
 
 
   handleChange = (value) => {
-    console.log('value', value);
+    // console.log('value', value);
+    // console.log("jsjsjsjsj")
     // this.setState({ text: value })
   }
 
   setRef = node => (this.editorRef = node)
 
   render() {
-    console.log("Ok now the editors are on the state", this.state.clauseEditors);
+    // console.log("Ok now the editors are on the state", this.state.clauseEditors);
     for (var i =0;i<this.state.clauseEditors.length;i++){
       var currentEditor = this.state.clauseEditors[i];
       this.editorchangelistener(currentEditor);
 
-    }
-    const editors = this.state.contractData.map((value,key)=>{
-      console.log("Key",key);
-      console.log("Value",value);
-      const editorid = `editor${key+1}`;
-      console.log("Editor ",editorid);
-      return(
-      <div className="col-md-6">
-        <h2 className="h4 text-center">Clause {key+1}</h2>
-        <button>Up</button>
-        <button>Down</button>
-        <div id={editorid} onChange={this.handleChange()}>
-          <p>{value.content}</p>
-        </div>
-      </div>
-      )
-    })
-    console.log("Dynamic ediotrs", editors)
-      
+    } 
     return (
       
 <div>
@@ -224,16 +246,16 @@ export default class Editor extends Component {
 
 <section className="row">
 {this.state.contractData.map((value,key)=>{
-      console.log("Key",key);
+      {/* console.log("Key",key);
       console.log("Value",value);
       const editorid = `editor${key+1}`;
-      console.log("Editor ",editorid);
+      console.log("Editor ",editorid); */}
       return(
       <div className="col-md-6">
-        <h2 className="h4 text-center">Clause {key+1}</h2>
-        <button>Up</button>
-        <button>Down</button>
-        <div id={editorid} onChange={this.handleChange()}>
+        <h2 className="h4 text-center">Clause {value.id}: {value.name}</h2>
+        <button  id={`${key}_up`}onClick={this.MoveClausesUp}>Up</button>
+        <button id={`${key}_down`} onClick = {this.MoveClausesDown}>Down</button>
+        <div id={`editor${key+1}`} onChange={this.handleChange()}>
           <p>{value.content}</p>
         </div>
       </div>
@@ -245,6 +267,14 @@ export default class Editor extends Component {
     )
   }
 }
+
+//utility function to reorder array
+// thanks to https://gist.github.com/damirm/18848ae9636abb524eb4
+function shift(arr, direction, n) {
+  var times = n > arr.length ? n % arr.length : n;
+  return arr.concat(arr.splice(0, (direction > 0 ? arr.length - times : times)));
+}
+
 
 
 // React Quill Lite wrapper :
@@ -308,3 +338,5 @@ export default class Editor extends Component {
 
   </div>
 </section> */}
+
+
