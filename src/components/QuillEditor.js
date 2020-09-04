@@ -38,11 +38,12 @@ export default class Editor extends Component {
 
     this.createEditor = this.createEditor.bind(this);
     this.handleChange =  this.handleChange.bind(this);
-    this.editorchangelistener = this.editorchangelistener.bind(this)
-    this.MoveClausesDown = this.MoveClausesDown.bind(this)
-    this.MoveClausesUp = this.MoveClausesUp.bind(this)
-    this.Movecurrenteditordata = this.Movecurrenteditordata.bind(this)
-    this.savecurrenteditordata = this.savecurrenteditordata.bind(this)
+    this.editorchangelistener = this.editorchangelistener.bind(this);
+    this.MoveClausesDown = this.MoveClausesDown.bind(this);
+    this.MoveClausesUp = this.MoveClausesUp.bind(this);
+    this.Movecurrenteditordata = this.Movecurrenteditordata.bind(this);
+    this.savecurrenteditordata = this.savecurrenteditordata.bind(this);
+    this.addnewclause =  this.addnewclause.bind(this);
 
 
 
@@ -109,13 +110,14 @@ export default class Editor extends Component {
     console.log("Move Clauses Up")
     const clause_to_move_up_from = parseInt(event.target.id[0]);
     console.log("clause_to_move_up_from",clause_to_move_up_from);
-    var reordered_data = shift(this.state.contractData,-1,1);
+    var reordered_data = shift([...this.state.contractData],-1,1);
     this.setState({
-      contractData:reordered_data,
+      contractData:[...reordered_data],
     })
-    this.savecurrenteditordata(reordered_data);
+    this.Movecurrenteditordata(reordered_data);
   }
   MoveClausesDown(event){
+
     console.log("Move Clauses Down")
     const clause_to_move_down_from = parseInt(event.target.id[0]);
     console.log("clause_to_move_down_from",clause_to_move_down_from);
@@ -139,6 +141,7 @@ export default class Editor extends Component {
       console.log(contractdata);
       var contractdataitem = contractdata[containerid - 1];
       console.log(contractdataitem);
+      currentEditor.setContents([{ insert: '' }]);
       currentEditor.setContents([{ insert: contractdataitem.content }]);
     }
     // for (var i = 0;i< this.state.contractData.length;i++){
@@ -146,26 +149,60 @@ export default class Editor extends Component {
     //   console.log(this.state.contractData[i])
     // }
   }
-  savecurrenteditordata(reordered_data){
+  savecurrenteditordata(){
     console.log("jsjsjsj")
     console.log(this.state.contractData);
     var editors = this.state.clauseEditors;
+    var contractdata = this.state.contractData;
     for (var i = 0; i< editors.length;i++){
       var currentEditor = editors[i];
       var containerid = parseInt(currentEditor.container.id[currentEditor.container.id.length - 1]);
       console.log(containerid);
-      var contractdata = reordered_data;
       console.log(contractdata);
       var contractdataitem = contractdata[containerid - 1];
       console.log(contractdataitem);
-      currentEditor.setContents([{ insert: contractdataitem.content }]);
+      contractdataitem.content = currentEditor.container.innerHTML
+      contractdata[i] = contractdataitem
     }
+    this.setState({
+      contractData:[...contractdata]
+    })
+
+    return contractdata
     // for (var i = 0;i< this.state.contractData.length;i++){
     //   console.log(i);
     //   console.log(this.state.contractData[i])
     // }
   }
 
+
+  addnewclause(){
+    console.log("Add new Clause");
+    var currentContractData = [...this.state.contractData];
+    var newClauseId = currentContractData.length + 1;
+    var newClause = {
+      "id":newClauseId,
+      "name":"New Clause",
+      "content":"Your newly added clause"
+    }
+    currentContractData.push(newClause);
+    this.setState({
+        contractData:[...currentContractData]
+    })
+
+    setTimeout( () =>
+    {
+      var currentEditors = [...this.state.clauseEditors]
+      var clauseeditor = this.createEditor(`#editor${newClauseId}`);
+      console.log(clauseeditor);
+      currentEditors.push(clauseeditor)
+      this.setState({
+        clauseEditors:[...currentEditors]
+      })
+      console.log("Ok now we have an extra editor", this.state.clauseEditors);
+    },10)
+
+  }
 
   handleChange = (value) => {
     // console.log('value', value);
@@ -258,6 +295,9 @@ export default class Editor extends Component {
 			<button type="button" className="ql-blockquote" value="blockquote" onclick="onBlockquoteClick()">
 				<span className="fa fa-quote-right"></span>
 			</button>
+		</span>
+		<span className="ql-formats">
+    <button onClick={this.addnewclause} style={{backgroundColor:'#556EE6',color:"white"}}> + </button>
 		</span>
 
 </nav>
