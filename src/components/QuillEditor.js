@@ -144,10 +144,6 @@ export default class Editor extends Component {
       currentEditor.setContents([{ insert: '' }]);
       currentEditor.setContents([{ insert: contractdataitem.content }]);
     }
-    // for (var i = 0;i< this.state.contractData.length;i++){
-    //   console.log(i);
-    //   console.log(this.state.contractData[i])
-    // }
   }
   savecurrenteditordata(){
     console.log("jsjsjsj")
