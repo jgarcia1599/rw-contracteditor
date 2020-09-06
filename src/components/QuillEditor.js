@@ -31,11 +31,6 @@ export default class Editor extends Component {
     })
     console.log(this.state.contractData);
 
-    // this.currentEditor = null;
-    // this.currentFormats = null;
-    // this.clauseEditors = [];
-    // this.contractaData = [];
-
     this.createEditor = this.createEditor.bind(this);
     this.handleChange =  this.handleChange.bind(this);
     this.editorchangelistener = this.editorchangelistener.bind(this);
@@ -49,16 +44,6 @@ export default class Editor extends Component {
 
   }
   componentDidMount() {
-    //this is where the backend call would go
-
-    // const data = contractdata.map( (clause) =>{
-    //   console.log(clause);
-    //   this.setState({
-    //     contractdata: this.state.contractData.push(clause)
-    //   })
-    // })
-    // console.log(this.state.contractData);
-
     // using set timeout here to allow quill to look for the corresponding
     // renderings in the html
     // thanks to https://stackoverflow.com/questions/49274106/quill-error-quill-invalid-quill-container
@@ -107,6 +92,7 @@ export default class Editor extends Component {
     }
   }
   MoveClausesUp(event){
+    this.savecurrenteditordata();
     console.log("Move Clauses Up")
     const clause_to_move_up_from = parseInt(event.target.id[0]);
     console.log("clause_to_move_up_from",clause_to_move_up_from);
@@ -117,6 +103,7 @@ export default class Editor extends Component {
     this.Movecurrenteditordata(reordered_data);
   }
   MoveClausesDown(event){
+    this.savecurrenteditordata();
 
     console.log("Move Clauses Down")
     const clause_to_move_down_from = parseInt(event.target.id[0]);
@@ -157,7 +144,7 @@ export default class Editor extends Component {
       console.log(contractdata);
       var contractdataitem = contractdata[containerid - 1];
       console.log(contractdataitem);
-      contractdataitem.content = currentEditor.container.innerHTML
+      contractdataitem.content = currentEditor.getText();
       contractdata[i] = contractdataitem
     }
     this.setState({
